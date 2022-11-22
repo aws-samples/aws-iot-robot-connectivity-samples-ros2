@@ -20,6 +20,7 @@ Set up appropriate credentials to run AWS CLI commands. This blog assumes you ar
 export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 export AWS_DEFAULT_REGION=us-west-2
+export AWS_REGION=$AWS_DEFAULT_REGION
 ```
 
 Install [AWS IoT device SDK Python](https://github.com/aws/aws-iot-device-sdk-python-v2) by running the following command
@@ -120,7 +121,7 @@ Next we create a policy file from a template file provided. This policy defines 
         "iot:RetainPublish"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
       ]
     },
     {
@@ -129,7 +130,7 @@ Next we create a policy file from a template file provided. This policy defines 
         "iot:Subscribe"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
       ]
     },
     {
@@ -138,7 +139,7 @@ Next we create a policy file from a template file provided. This policy defines 
         "iot:Connect"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:client/CLIENT"
+        "arn:aws:iot:REGION:ACCOUNT_ID:client/CLIENT"
       ]
     }
   ]
@@ -152,6 +153,7 @@ export IOT_POLICY_FILE=~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_c
 cat $IOT_POLICY_TEMPLATE >> $IOT_POLICY_FILE
 sed -i -e "s/ACCOUNT_ID/$ACCOUNT_ID/g" $IOT_POLICY_FILE
 sed -i -e "s/CLIENT/$THING_NAME/g" $IOT_POLICY_FILE
+sed -i -e "s/REGION/$AWS_REGION/g" $IOT_POLICY_FILE
 cat $IOT_POLICY_FILE
 aws iot create-policy --policy-name $IOT_POLICY_NAME --policy-document file://$IOT_POLICY_FILE
 aws iot attach-policy --policy-name $IOT_POLICY_NAME --target $CERT_ARN
