@@ -1,6 +1,6 @@
-# How to connect your ROS2 robots to AWS IoT and start capturing telemetry data
+# Connect ROS2 robots to AWS IoT and capture telemetry
 
-learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT. This code was tested on an [Ubuntu 22.04](https://www.releases.ubuntu.com/22.04/) system on [ROS2 Humble](https://docs.ros.org/en/humble/index.html). You need to setup certificates on your device to connect to AWS IoT Core, which is setup via [AWS Command Line Interface](https://aws.amazon.com/cli/) (AWS CLI) with appropriate privileges and assumes you have AWS Console access.
+Learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT. This code was tested on an [Ubuntu 22.04](https://www.releases.ubuntu.com/22.04/) system on [ROS2 Humble](https://docs.ros.org/en/humble/index.html). You need to setup certificates on your device to connect to AWS IoT Core, which is setup via [AWS Command Line Interface](https://aws.amazon.com/cli/) (AWS CLI) with appropriate privileges and assumes you have AWS Console access.
 
 Install AWS CLI using the following commands:
 ```
