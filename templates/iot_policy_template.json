@@ -9,7 +9,7 @@
         "iot:RetainPublish"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
       ]
     },
     {
@@ -18,7 +18,7 @@
         "iot:Subscribe"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
       ]
     },
     {
@@ -27,7 +27,7 @@
         "iot:Connect"
       ],
       "Resource": [
-        "arn:aws:iot:us-west-2:ACCOUNT_ID:client/CLIENT"
+        "arn:aws:iot:REGION:ACCOUNT_ID:client/CLIENT"
       ]
     }
   ]
