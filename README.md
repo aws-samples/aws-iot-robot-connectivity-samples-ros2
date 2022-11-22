@@ -1,7 +1,7 @@
 # Connect ROS2 robots to AWS IoT and capture telemetry
 
 ## Blog
-More information on the sample application with ROS2 and AWS IoT use cases is present [in this blog](https://aws.amazon.com/robotics/how-to-connect-your-robots-to-the-aws-cloud-and-drive-data-driven-innovation/)
+More information on the sample application with ROS2 and AWS IoT use cases is present [in this blog](https://aws.amazon.com/blogs/robotics/how-to-connect-your-robots-to-the-aws-cloud-and-drive-data-driven-innovation/)
 
 ## Sample application walkthrough
 
