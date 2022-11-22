@@ -1,0 +1,9 @@
+{
+    "endpoint" : "ENDPOINT",
+    "rootCAPath" : "ROOTCA",
+    "certificatePath" : "CERTPATH",
+    "privateKeyPath" : "PRIVATEKEY",
+    "port" : PORT,
+    "clientID" : "CLIENT"
+}
+
