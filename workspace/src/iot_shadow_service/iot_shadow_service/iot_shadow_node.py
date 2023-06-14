@@ -22,10 +22,8 @@ from awsiot import iotshadow, mqtt_connection_builder
 from iot_shadow_service_msgs.srv import UpdateShadow
 from iot_shadow_service_msgs.msg import ShadowUpdateSnapshot
 import json
-import queue
 import rclpy
 from rclpy.node import Node, SrvTypeRequest, SrvTypeResponse
-import threading
 from typing import Any
 
 
