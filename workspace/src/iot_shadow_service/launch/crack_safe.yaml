@@ -1,0 +1,27 @@
+launch:
+
+- arg:
+    name: path_for_config
+- arg:
+    name: shadow_name
+    default: "my_ros2_shadow"
+
+- node:
+    pkg: "iot_shadow_service"
+    exec: "digit_generator"
+    name: "digits"
+
+- node:
+    pkg: "iot_shadow_service"
+    exec: "safe_cracker"
+    name: "safe_cracker"
+
+- node:
+    pkg: "iot_shadow_service"
+    exec: "iot_shadow_node"
+    name: "iot_shadow_node"
+    param:
+      - name: path_for_config
+        value: $(var path_for_config)
+      - name: shadow_name
+        value: $(var shadow_name)

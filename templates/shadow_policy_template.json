@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": [
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/$aws/things/THING_NAME/shadow/name/SHADOW_NAME/update/documents"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Receive"
+      ],
+      "Resource": [
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/$aws/things/THING_NAME/shadow/name/SHADOW_NAME/update/documents"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish"
+      ],
+      "Resource": [
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/$aws/things/THING_NAME/shadow/name/SHADOW_NAME/update"
+      ]
+    }
+  ]
+}
