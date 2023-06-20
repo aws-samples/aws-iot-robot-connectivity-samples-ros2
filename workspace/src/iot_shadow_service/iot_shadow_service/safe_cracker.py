@@ -60,8 +60,8 @@ class SafeCracker(Node):
             with self._lock:
                 self._target_digit = desired_digit
                 self._clockwise = not self._clockwise
-            clockwise_str = "clockwise" if self._clockwise else "anti-clockwise"
-            self.get_logger().info(f"Trying to reach {self._target_digit} from {self._current_digit} spinning {clockwise_str}")
+            direction_str = "clockwise" if self._clockwise else "anti-clockwise"
+            self.get_logger().info(f"Trying to reach {self._target_digit} from {self._current_digit} spinning {direction_str}")
 
     def turn_towards_target(self):
         with self._lock:
@@ -71,8 +71,8 @@ class SafeCracker(Node):
             if change == 0:
                 return
             self._current_digit = (self._current_digit + change) % DIGITS_ON_DIAL
-            clockwise_str = "clockwise" if self._clockwise else "anti-clockwise"
-            self.get_logger().debug(f"Trying to reach {self._target_digit} from {self._current_digit} spinning {clockwise_str}")
+            direction_str = "clockwise" if self._clockwise else "anti-clockwise"
+            self.get_logger().debug(f"Trying to reach {self._target_digit} from {self._current_digit} spinning {direction_str}")
 
         update_target_msg = UpdateShadow.Request()
         update_target_msg.reported = json.dumps({"digit": self._current_digit})

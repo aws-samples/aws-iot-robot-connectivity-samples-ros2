@@ -5,7 +5,11 @@ More information on the sample application with ROS2 and AWS IoT use cases is pr
 
 ## Sample application walkthrough
 
-Learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT. This code was tested on an [Ubuntu 22.04](https://www.releases.ubuntu.com/22.04/) system on [ROS2 Humble](https://docs.ros.org/en/humble/index.html). You need to setup certificates on your device to connect to AWS IoT Core, which is setup via [AWS Command Line Interface](https://aws.amazon.com/cli/) (AWS CLI) with appropriate privileges and assumes you have AWS Console access.
+Learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT and via IoT Shadow. This code was tested on an [Ubuntu 22.04](https://www.releases.ubuntu.com/22.04/) system on [ROS2 Humble](https://docs.ros.org/en/humble/index.html).
+
+### IoT Setup
+
+You need to setup certificates on your device to connect to AWS IoT Core, which is setup via [AWS Command Line Interface](https://aws.amazon.com/cli/) (AWS CLI) with appropriate privileges and assumes you have AWS Console access.
 
 Install AWS CLI using the following commands:
 ```
@@ -165,7 +169,9 @@ You should see a response like the following:
 
 You have completed all the setup needed to send data to AWS IoT Core! You may now remove the AWS CLI specific credentials from the robot since you now have the IoT Certificates setup for the robot to communicate with AWS IoT Core.
 
-Launch the rosnode with the following command:
+### Telemetry MQTT Node
+
+This node can be used to send messages directly to AWS IoT Core using MQTT. Launch the rosnode with the following command:
 
 ```
 source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
@@ -195,9 +201,9 @@ Subscribe to the topic published by the AWS IoT thing in the client, to see mock
 ![mqtt subscription](images/mqtt_subscription.png)
 You can now convert any ROS2 topic data and send it over as an MQTT topic over AWS IoT Core, with a thing transformation layer from ROS2 topic to JSON-formatted messages sent over an MQTT topic.
 
-## IoT Shadow Node
+### IoT Shadow Node
 
-This sample application requires the Telemetry MQTT sample application setup steps, as it reuses that IoT Thing and certificate. It shows how to create and interact with an IoT Core Named Shadow. The example node within subscribes to shadow changes and publishes them on a ROS topic, as well as exposing service calls for other ROS nodes to update the shadow.
+This section shows how to create and interact with an IoT Core Named Shadow. The example node within subscribes to shadow changes and publishes them on a ROS topic, as well as exposing service calls for other ROS nodes to update the shadow.
 
 ![Shadow Node Block Diagram](images/shadow_node.png)
 
@@ -205,7 +211,7 @@ This node is demonstrated using a safe cracker robot, as shown above. The robot 
 
 The digit generator uses a service call to set the `desired` state. The shadow node listens to any shadow updates and publishes them on a ROS2 topic. The safe cracker robot subscribes to these updates, and uses a service call to set the `reported` state. More information on shadow use is available later in this file.
 
-To set up this application, you first need to create a named shadow for the Thing. This can be done as follows:
+To set up this application, you first need to create a named shadow for the Thing. As environment variables are reused from the previous setup, it is recommended to reuse the terminal from the setup steps. Creating the shadow can be done as follows:
 
 ```bash
 export SHADOW_NAME=my_ros2_shadow
@@ -273,7 +279,36 @@ export FULL_CONFIG_PATH="${IOT_CONFIG_FILE/#\~/$HOME}"
 ros2 launch iot_shadow_service crack_safe.yaml shadow_name:=$SHADOW_NAME path_for_config:=$FULL_CONFIG_PATH
 ```
 
-To view the named shadow changing, navigate to the IoT Core page of the AWS console, as shown below:
+You can now see the topics being published on ROS2 by opening a new terminal and executing:
+
+```bash
+source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
+ros2 topic echo /shadow_update_snapshot
+```
+
+This will show a set of messages where the desired and reported digits are changing based on updates to the shadow. An example set of messages is as follows:
+
+```log
+---
+desired: '{"digit": 61}'
+reported: '{"digit": 68}'
+delta: ''
+---
+desired: '{"digit": 61}'
+reported: '{"digit": 65}'
+delta: ''
+---
+desired: '{"digit": 61}'
+reported: '{"digit": 62}'
+delta: ''
+---
+desired: '{"digit": 61}'
+reported: '{"digit": 61}'
+delta: ''
+---
+```
+
+To view the named shadow changing in the AWS console, navigate to the IoT Core page, as shown below:
 ![IoT search bar](images/iot_core_console.png)
 
 Select the Things page from All Devices on the navigation bar on the left:
@@ -293,7 +328,7 @@ Scroll down a little to the Shadow document. The numbers in this state should be
 
 You can now write updates to your IoT Core Named Shadow from a ROS2 service call, and publish any updates to the Shadow published to a ROS2 topic, allowing connected ROS2 nodes to benefit from a human-readable JSON format document synchronized with AWS.
 
-### IoT Core Shadow Further Information
+#### IoT Core Shadow Further Information
 
 IoT Core Shadows are human-readable JSON documents structured into `desired` and `reported` sections. The `desired` section has the fields that the cloud desires the Thing to match. The `reported` section is for the Thing to update the cloud with its actual state. In addition, IoT Core calculates the difference between the `desired` and `reported` sections, and if any fields are different, writes those fields into a `delta` section.
 
