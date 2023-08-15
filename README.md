@@ -193,6 +193,8 @@ source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
 ros2 run telemetry_mqtt mqtt_telemetry_pub --ros-args --param path_for_config:=$IOT_CONFIG_FILE
 ```
 
+**Endpoint discovery**: this node also allows the use of cloud discovery, which allows the automatic discovery of AWS Greengrass core devices to connect to instead of a cloud endpoint. For more information on this option, please see the [developer guide](https://docs.aws.amazon.com/greengrass/v2/developerguide/connect-client-devices.html).
+
 To view the data being published, login to your AWS console to the MQTT test client page on the browser by searching for IoT Core in the search bar and selecting MQTT test client as shown below.
 ![IoT search bar](images/iot_core_console.png)
 Connect to the MQTT test client on the console as shown below
