@@ -108,6 +108,7 @@ sed -i -e "s/PRIVATEKEY/$(echo $PRIV_KEY_LOCATION | sed 's_/_\\/_g')/g" $IOT_CON
 sed -i -e "s/CERTPATH/$(echo $CERT_FILE | sed 's_/_\\/_g')/g" $IOT_CONFIG_FILE
 sed -i -e "s/CLIENT/$THING_NAME/g" $IOT_CONFIG_FILE
 sed -i -e "s/PORT/$PORT/g" $IOT_CONFIG_FILE
+sed -i -e "s/REGION/$AWS_REGION/g" $IOT_CONFIG_FILE
 cat $IOT_CONFIG_FILE
 ```
 
@@ -192,6 +193,8 @@ export IOT_CONFIG_FILE=~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_c
 source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
 ros2 run telemetry_mqtt mqtt_telemetry_pub --ros-args --param path_for_config:=$IOT_CONFIG_FILE
 ```
+
+**Endpoint discovery**: this node also allows the use of cloud discovery, which allows the automatic discovery of AWS Greengrass core devices to connect to instead of a cloud endpoint. For more information on this option, please see the [developer guide](https://docs.aws.amazon.com/greengrass/v2/developerguide/connect-client-devices.html).
 
 To view the data being published, login to your AWS console to the MQTT test client page on the browser by searching for IoT Core in the search bar and selecting MQTT test client as shown below.
 ![IoT search bar](images/iot_core_console.png)
