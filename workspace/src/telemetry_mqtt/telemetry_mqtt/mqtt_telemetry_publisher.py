@@ -35,7 +35,6 @@ class MqttPublisher(Node):
 
         self.declare_parameter("path_for_config", "")
         self.declare_parameter("discover_endpoints", False)
-        self.declare_parameter("connection_retries", 5)
 
         path_for_config = self.get_parameter("path_for_config").get_parameter_value().string_value
         discover_endpoints = self.get_parameter("discover_endpoints").get_parameter_value().bool_value
@@ -78,18 +77,21 @@ class MqttPublisher(Node):
         tls_options.override_default_trust_store_from_path(None, cert_data["rootCAPath"])
         tls_context = io.ClientTlsContext(tls_options)
 
+        region = cert_data["region"]
+        retry_attempts = cert_data["retryAttempts"]
+        retry_wait_time = cert_data["retryWaitTime"]
+
         discovery_client = DiscoveryClient(
             io.ClientBootstrap.get_or_create_static_default(),
             io.SocketOptions(),
             tls_context,
-            # TODO: Get region from config!
-            "us-west-2",
+            region,
         )
         resp_future = discovery_client.discover(cert_data["clientID"])
         discover_response = resp_future.result()
         self.get_logger().debug(f"Discovery response is: {discover_response}")
 
-        for tries in range(self.get_parameter("connection_retries").value):
+        for tries in range(retry_attempts):
             self.get_logger().info(f"Connection attempt: {tries}")
             for gg_group in discover_response.gg_groups:
                 for gg_core in gg_group.cores:
@@ -111,7 +113,7 @@ class MqttPublisher(Node):
                         except Exception as e:
                             self.get_logger().error(f"Connection failed with exception: {e}")
                             continue
-            time.sleep(RETRY_WAIT_TIME_SECONDS)
+            time.sleep(retry_wait_time)
         raise Exception("All connection attempts failed!")
 
     def build_greengrass_connection(self, gg_group, connectivity_info, cert_data):

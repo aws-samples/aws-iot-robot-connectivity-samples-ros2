@@ -4,6 +4,8 @@
     "certificatePath" : "CERTPATH",
     "privateKeyPath" : "PRIVATEKEY",
     "port" : PORT,
-    "clientID" : "CLIENT"
+    "clientID" : "CLIENT",
+    "region": "REGION",
+    "retryWaitTime": 5,
+    "retryAttempts": 10
 }
-

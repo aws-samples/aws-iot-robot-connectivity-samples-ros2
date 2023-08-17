@@ -108,6 +108,7 @@ sed -i -e "s/PRIVATEKEY/$(echo $PRIV_KEY_LOCATION | sed 's_/_\\/_g')/g" $IOT_CON
 sed -i -e "s/CERTPATH/$(echo $CERT_FILE | sed 's_/_\\/_g')/g" $IOT_CONFIG_FILE
 sed -i -e "s/CLIENT/$THING_NAME/g" $IOT_CONFIG_FILE
 sed -i -e "s/PORT/$PORT/g" $IOT_CONFIG_FILE
+sed -i -e "s/REGION/$AWS_REGION/g" $IOT_CONFIG_FILE
 cat $IOT_CONFIG_FILE
 ```
 
