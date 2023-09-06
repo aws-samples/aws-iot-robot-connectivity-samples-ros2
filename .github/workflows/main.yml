@@ -13,11 +13,3 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.3
         with:
           target-ros2-distro: humble
-          colcon-defaults: |
-            {
-              "build": {
-                "cmake-args": [
-                    "-DMY_CUSTOM_OPTION=ON"
-                ]
-              }
-            }
