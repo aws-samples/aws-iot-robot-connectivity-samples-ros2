@@ -9,7 +9,8 @@
         "iot:RetainPublish"
       ],
       "Resource": [
-        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic",
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/$aws/rules/*"
       ]
     },
     {
