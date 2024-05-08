@@ -344,10 +344,8 @@ The general strategy here is that we will send MQTT messages to a AWS IoT Rule u
 We need to create an IAM role for the AWS IoT Rule. The first step is to set the permissions JSON file for the role.
 
 ```
-export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-
-export CWL_ROLE_PERMISSIONS_TEMPLATE="$(pwd)/templates/cwl_role_permissions_template.json"
-export CWL_ROLE_PERMISSIONS_FILE="$(pwd)/iot_certs_and_config/cwl_role_permissions.json"
+export CWL_ROLE_PERMISSIONS_TEMPLATE="~/aws-iot-robot-connectivity-samples-ros2/templates/cwl_role_permissions_template.json"
+export CWL_ROLE_PERMISSIONS_FILE="~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_config/cwl_role_permissions.json"
 
 cat $CWL_ROLE_PERMISSIONS_TEMPLATE > $CWL_ROLE_PERMISSIONS_FILE
 
