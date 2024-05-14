@@ -18,12 +18,10 @@
 #
 import rclpy
 from rclpy.node import Node
-from awscrt import mqtt, io
-from awsiot import mqtt_connection_builder
-from awsiot.greengrass_discovery import DiscoveryClient
+from awscrt import mqtt 
 import json
-import time
-from telemetry_mqtt.mqtt_telemetry_publisher import MqttPublisher
+
+from telemetry_mqtt.connection_helper import ConnectionHelper
 
 from rcl_interfaces.msg import Log
 
@@ -35,11 +33,17 @@ log_level_map = {
     int.from_bytes(Log.FATAL, byteorder='big'): "FATAL",
 }
 
-class RepublishToCloudwatch(MqttPublisher):
+class RepublishToCloudwatch(Node):
     def __init__(self):
-        super(MqttPublisher, self).__init__('republish_to_cloudwatch')
-        super().__init__()
+        super().__init__('republish_to_cloudwatch')
+        self.declare_parameter("path_for_config", "")
+        self.declare_parameter("discover_endpoints", False)
         self.declare_parameter("aws_iot_log_topic", "$aws/rules/ros2_logs/my_ros2_robot_thing/logs")
+
+        path_for_config = self.get_parameter("path_for_config").get_parameter_value().string_value
+        discover_endpoints = self.get_parameter("discover_endpoints").get_parameter_value().bool_value
+        self.connection_helper = ConnectionHelper(self.get_logger(), path_for_config, discover_endpoints)
+
 
         self.subscription = self.create_subscription(
             Log,
@@ -62,7 +66,7 @@ class RepublishToCloudwatch(MqttPublisher):
             "time": f"{msg.stamp.sec}.{msg.stamp.nanosec}"
         }
 
-        self.mqtt_conn.publish(
+        self.connection_helper.mqtt_conn.publish(
             topic=topic_name,
             payload=json.dumps(cwl_message),
             qos=mqtt.QoS.AT_LEAST_ONCE

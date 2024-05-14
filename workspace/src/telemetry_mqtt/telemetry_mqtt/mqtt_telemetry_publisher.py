@@ -17,14 +17,11 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import json
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-import time
-from awscrt import mqtt, io
-from awsiot import mqtt_connection_builder
-from awsiot.greengrass_discovery import DiscoveryClient
+from awscrt import mqtt 
+from telemetry_mqtt.connection_helper import ConnectionHelper
 
 RETRY_WAIT_TIME_SECONDS = 5
 
@@ -32,106 +29,14 @@ RETRY_WAIT_TIME_SECONDS = 5
 class MqttPublisher(Node):
     def __init__(self):
         super().__init__('mqtt_publisher')
-
         self.declare_parameter("path_for_config", "")
         self.declare_parameter("discover_endpoints", False)
 
         path_for_config = self.get_parameter("path_for_config").get_parameter_value().string_value
         discover_endpoints = self.get_parameter("discover_endpoints").get_parameter_value().bool_value
-
-        with open(path_for_config) as f:
-          cert_data = json.load(f)
-
-        self.get_logger().info("Config we are loading is :\n{}".format(cert_data))
-
-        if discover_endpoints:
-            self.get_logger().info("Discovering endpoints for connection")
-            self.connect_using_discovery(cert_data)
-        else:
-            self.get_logger().info("Connecting directly to endpoint")
-            self.connect_to_endpoint(cert_data)
+        self.connection_helper = ConnectionHelper(self.get_logger(), path_for_config, discover_endpoints)
 
         self.init_subs()
-
-    def connect_to_endpoint(self, cert_data):
-        self.mqtt_conn = mqtt_connection_builder.mtls_from_path(
-            endpoint=cert_data["endpoint"],
-            port= cert_data["port"],
-            cert_filepath= cert_data["certificatePath"],
-            pri_key_filepath= cert_data["privateKeyPath"],
-            ca_filepath= cert_data["rootCAPath"],
-            client_id= cert_data["clientID"],
-            http_proxy_options=None,
-        )
-        connected_future = self.mqtt_conn.connect()
-        connected_future.result()
-        self.get_logger().info("Connected!")
-
-    def connect_using_discovery(self, cert_data):
-        tries = 0
-
-        tls_options = io.TlsContextOptions.create_client_with_mtls_from_path(
-            cert_data["certificatePath"],
-            cert_data["privateKeyPath"],
-        )
-        tls_options.override_default_trust_store_from_path(None, cert_data["rootCAPath"])
-        tls_context = io.ClientTlsContext(tls_options)
-
-        region = cert_data["region"]
-        retry_attempts = cert_data["retryAttempts"]
-        retry_wait_time = cert_data["retryWaitTime"]
-
-        discovery_client = DiscoveryClient(
-            io.ClientBootstrap.get_or_create_static_default(),
-            io.SocketOptions(),
-            tls_context,
-            region,
-        )
-        resp_future = discovery_client.discover(cert_data["clientID"])
-        discover_response = resp_future.result()
-        self.get_logger().debug(f"Discovery response is: {discover_response}")
-
-        for tries in range(retry_attempts):
-            self.get_logger().info(f"Connection attempt: {tries}")
-            for gg_group in discover_response.gg_groups:
-                for gg_core in gg_group.cores:
-                    for connectivity_info in gg_core.connectivity:
-                        try:
-                            self.get_logger().debug(
-                                "Trying core {} as host {}:{}".format(
-                                    gg_core.thing_arn,
-                                    connectivity_info.host_address,
-                                    connectivity_info.port
-                                )
-                            )
-                            self.mqtt_conn = self.build_greengrass_connection(
-                                gg_group,
-                                connectivity_info,
-                                cert_data
-                            )
-                            return
-                        except Exception as e:
-                            self.get_logger().error(f"Connection failed with exception: {e}")
-                            continue
-            time.sleep(retry_wait_time)
-        raise Exception("All connection attempts failed!")
-
-    def build_greengrass_connection(self, gg_group, connectivity_info, cert_data):
-        conn = mqtt_connection_builder.mtls_from_path(
-            endpoint=connectivity_info.host_address,
-            port=connectivity_info.port,
-            cert_filepath=cert_data["certificatePath"],
-            pri_key_filepath=cert_data["privateKeyPath"],
-            ca_bytes=gg_group.certificate_authorities[0].encode('utf-8'),
-            client_id=cert_data["clientID"],
-            clean_session=False,
-            keep_alive_secs=30
-        )
-        connect_future = conn.connect()
-        connect_future.result()
-        self.get_logger().info("Connected!")
-        return conn
-
 
     def init_subs(self):
         """Subscribe to mock ros2 telemetry topic"""
@@ -146,7 +51,7 @@ class MqttPublisher(Node):
         """Callback for the mock ros2 telemetry topic"""
         message_json = msg.data
         self.get_logger().info("Received data on ROS2 {}\nPublishing to AWS IoT".format(msg.data))
-        self.mqtt_conn.publish(
+        self.connection_helper.mqtt_conn.publish(
             topic="ros2_mock_telemetry_topic",
             payload=message_json,
             qos=mqtt.QoS.AT_LEAST_ONCE
@@ -166,6 +71,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-
-

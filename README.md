@@ -358,7 +358,7 @@ Next, create the role with the permissions JSON file we just created, along with
 
 
 ```
-export CWL_ROLE_ARN=$(aws iam create-role --role-name IoTCloudWatchRole --assume-role-policy-document file://./templates/cwl_role_trust.json --query 'Role.Arn')
+export CWL_ROLE_ARN=$(aws iam create-role --role-name IoTCloudWatchRole --assume-role-policy-document file://./templates/cwl_role_trust.json --query 'Role.Arn' --output text)
 
 aws iam put-role-policy --role-name IoTCloudwatchRole --policy-name allow-publish-to-cwl --policy-document file://./iot_certs_and_config/cwl_role_permissions.json
 ```
