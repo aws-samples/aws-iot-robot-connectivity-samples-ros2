@@ -337,6 +337,46 @@ IoT Core Shadows are human-readable JSON documents structured into `desired` and
 
 For the sample application, one node generates data, updating the `desired` section. The other node listens for updates to the `desired` section for its next target. Whenever it changes its state, it updates the `reported` state. The `delta` field is not used. The result is that the shadow shows an update to the `desired` digit every four seconds, with the `reported` digit moving towards the `desired` digit, alternating between upwards and downwards.
 
+### Sending ROS2 Logs to AWS CloudWatch
+
+The general strategy here is that we will send MQTT messages to a AWS IoT Rule using Basic Ingest, which in turn will forward the MQTT messages to Amazon Cloudwatch.
+
+We need to create an IAM role for the AWS IoT Rule. The first step is to set the permissions JSON file for the role.
+
+```
+export CWL_ROLE_PERMISSIONS_TEMPLATE="~/aws-iot-robot-connectivity-samples-ros2/templates/cwl_role_permissions_template.json"
+export CWL_ROLE_PERMISSIONS_FILE="~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_config/cwl_role_permissions.json"
+
+cat $CWL_ROLE_PERMISSIONS_TEMPLATE > $CWL_ROLE_PERMISSIONS_FILE
+
+sed -i -e "s/REGION/$AWS_REGION/g" $CWL_ROLE_PERMISSIONS_FILE
+sed -i -e "s/ACCOUNT_ID/$ACCOUNT_ID/g" $CWL_ROLE_PERMISSIONS_FILE
+cat $CWL_ROLE_PERMISSIONS_FILE
+```
+
+Next, create the role with the permissions JSON file we just created, along with the trust policy.
+
+
+```
+export CWL_ROLE_ARN=$(aws iam create-role --role-name IoTCloudWatchRole --assume-role-policy-document file://./templates/cwl_role_trust.json --query 'Role.Arn' --output text)
+
+aws iam put-role-policy --role-name IoTCloudwatchRole --policy-name allow-publish-to-cwl --policy-document file://./iot_certs_and_config/cwl_role_permissions.json
+```
+
+Finally, we create the AWS IoT rule
+
+```
+aws iot create-topic-rule --rule-name ros2_logs --topic-rule-payload "{\"sql\":\"SELECT * FROM '+/logs'\", \"actions\":[{\"cloudwatchLogs\":{\"logGroupName\":\"/ros2/logs\", \"batchMode\":false, \"roleArn\": ${CWL_ROLE_ARN}}}]}" --region us-east-1
+```
+
+In the ROS workspace, follow a similar set of steps to run the log forwarding node.
+
+```
+export IOT_CONFIG_FILE=~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_config/iot_config.json
+source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
+ros2 run iot_cloudwatch_logs republish --ros-args --param path_for_config:=$IOT_CONFIG_FILE
+```
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.

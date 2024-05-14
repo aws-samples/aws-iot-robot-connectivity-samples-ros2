@@ -16,56 +16,73 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
 from awscrt import mqtt 
+import json
+
 from telemetry_mqtt.connection_helper import ConnectionHelper
 
-RETRY_WAIT_TIME_SECONDS = 5
+from rcl_interfaces.msg import Log
 
+log_level_map = {
+    int.from_bytes(Log.DEBUG, byteorder='big'): "DEBUG",
+    int.from_bytes(Log.INFO, byteorder='big'): "INFO",
+    int.from_bytes(Log.WARN, byteorder='big'): "WARN",
+    int.from_bytes(Log.ERROR, byteorder='big'): "ERROR",
+    int.from_bytes(Log.FATAL, byteorder='big'): "FATAL",
+}
 
-class MqttPublisher(Node):
+class RepublishToCloudwatch(Node):
     def __init__(self):
-        super().__init__('mqtt_publisher')
+        super().__init__('republish_to_cloudwatch')
         self.declare_parameter("path_for_config", "")
         self.declare_parameter("discover_endpoints", False)
+        self.declare_parameter("aws_iot_log_topic", "$aws/rules/ros2_logs/my_ros2_robot_thing/logs")
 
         path_for_config = self.get_parameter("path_for_config").get_parameter_value().string_value
         discover_endpoints = self.get_parameter("discover_endpoints").get_parameter_value().bool_value
         self.connection_helper = ConnectionHelper(self.get_logger(), path_for_config, discover_endpoints)
 
-        self.init_subs()
 
-    def init_subs(self):
-        """Subscribe to mock ros2 telemetry topic"""
         self.subscription = self.create_subscription(
-            String,
-            'mock_telemetry',
+            Log,
+            '/rosout',
             self.listener_callback,
-            10
-        )
+            10)
+        self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        """Callback for the mock ros2 telemetry topic"""
-        message_json = msg.data
-        self.get_logger().info("Received data on ROS2 {}\nPublishing to AWS IoT".format(msg.data))
+        topic_name = self.get_parameter("aws_iot_log_topic").get_parameter_value().string_value
+        level = log_level_map.get(msg.level, "")
+        
+        cwl_message = {
+            "name": msg.name,
+            "msg": msg.msg,
+            "file": msg.file,
+            "function": msg.function,
+            "line": msg.line,
+            "level": level,
+            "time": f"{msg.stamp.sec}.{msg.stamp.nanosec}"
+        }
+
         self.connection_helper.mqtt_conn.publish(
-            topic="ros2_mock_telemetry_topic",
-            payload=message_json,
+            topic=topic_name,
+            payload=json.dumps(cwl_message),
             qos=mqtt.QoS.AT_LEAST_ONCE
         )
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MqttPublisher()
+    subscriber = RepublishToCloudwatch()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(subscriber)
 
-    # Destroy the node
-    minimal_subscriber.destroy_node()
+    # Destroy the node explicitly
+    # (optional - otherwise it will be done automatically
+    # when the garbage collector destroys the node object)
+    subscriber.destroy_node()
     rclpy.shutdown()
 
 
