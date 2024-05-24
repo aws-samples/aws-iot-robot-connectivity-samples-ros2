@@ -386,7 +386,7 @@ In the Robot Operating System (ROS), the `cmd_vel` topic is a standard topic use
 
 2. **Angular Velocity**: This component represents the desired angular velocity (or rotational speed) of the robot around the x, y, and z axes. For mobile robots, usually only the z component is used, which corresponds to the rotation around the vertical axis (yaw angle).
 
-By publishing velocity commands to the `cmd_vel` topic, a node (e.g., a controller, a navigation stack, or a user interface) can control the movement of the robot. We will publish the cmd_vel message from O3DE simulation to IoT core as MQTT topic.
+By publishing velocity commands to the `cmd_vel` topic, a node (e.g., a controller, a navigation stack, or a user interface) can control the movement of the robot. 
 
 ## Security
 
