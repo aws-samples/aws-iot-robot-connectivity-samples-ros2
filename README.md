@@ -379,6 +379,7 @@ source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
 ros2 run iot_cloudwatch_logs republish --ros-args --param path_for_config:=$IOT_CONFIG_FILE
 ```
 ## Forwarding cmd_vel to IoT Core
+
 In the Robot Operating System (ROS), the `cmd_vel` topic is a standard topic used for sending velocity commands to a mobile robot or a robot with a mobile base. It is typically used for controlling the linear and angular velocities of the robot. The `cmd_vel` topic publishes messages of the type `geometry_msgs/Twist`, which contains two components:
 
 1. **Linear Velocity**: This component represents the desired linear velocity of the robot in the x, y, and z directions. For mobile robots moving on a flat surface, typically only the x and y components are used.
