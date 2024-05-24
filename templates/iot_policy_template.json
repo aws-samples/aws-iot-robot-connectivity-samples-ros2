@@ -10,6 +10,7 @@
       ],
       "Resource": [
         "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic",
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/cmd_vel",
         "arn:aws:iot:REGION:ACCOUNT_ID:topic/$aws/rules/*"
       ]
     },
@@ -19,7 +20,8 @@
         "iot:Subscribe"
       ],
       "Resource": [
-        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic",
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/cmd_vel"
       ]
     },
     {

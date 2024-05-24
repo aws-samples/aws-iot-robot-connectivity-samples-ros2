@@ -112,7 +112,7 @@ sed -i -e "s/REGION/$AWS_REGION/g" $IOT_CONFIG_FILE
 cat $IOT_CONFIG_FILE
 ```
 
-Next we create a policy file from a template file provided. This policy defines the permissions boundary for our AWS IoT Thing. Notice that this template only allows subscription and reception to `ros2_mock_telemetry_topic`. Modify the policy per your needs as you expand your use cases.
+Next we create a policy file from a template file provided. This policy defines the permissions boundary for our AWS IoT Thing. Notice that this template only allows subscription and reception to `ros2_mock_telemetry_topic` and `cmd_vel`. Modify the policy per your needs as you expand your use cases.
 
 ```
 {
@@ -126,7 +126,8 @@ Next we create a policy file from a template file provided. This policy defines 
         "iot:RetainPublish"
       ],
       "Resource": [
-        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/ros2_mock_telemetry_topic",
+        "arn:aws:iot:REGION:ACCOUNT_ID:topic/cmd_vel"
       ]
     },
     {
@@ -135,7 +136,8 @@ Next we create a policy file from a template file provided. This policy defines 
         "iot:Subscribe"
       ],
       "Resource": [
-        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic"
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/ros2_mock_telemetry_topic",
+        "arn:aws:iot:REGION:ACCOUNT_ID:topicfilter/cmd_vel"
       ]
     },
     {
@@ -376,6 +378,15 @@ export IOT_CONFIG_FILE=~/aws-iot-robot-connectivity-samples-ros2/iot_certs_and_c
 source ~/aws-iot-robot-connectivity-samples-ros2/workspace/install/setup.bash
 ros2 run iot_cloudwatch_logs republish --ros-args --param path_for_config:=$IOT_CONFIG_FILE
 ```
+## Forwarding cmd_vel to IoT Core
+
+In the Robot Operating System (ROS), the `cmd_vel` topic is a standard topic used for sending velocity commands to a mobile robot or a robot with a mobile base. It is typically used for controlling the linear and angular velocities of the robot. The `cmd_vel` topic publishes messages of the type `geometry_msgs/Twist`, which contains two components:
+
+1. **Linear Velocity**: This component represents the desired linear velocity of the robot in the x, y, and z directions. For mobile robots moving on a flat surface, typically only the x and y components are used.
+
+2. **Angular Velocity**: This component represents the desired angular velocity (or rotational speed) of the robot around the x, y, and z axes. For mobile robots, usually only the z component is used, which corresponds to the rotation around the vertical axis (yaw angle).
+
+By publishing velocity commands to the `cmd_vel` topic, a node (e.g., a controller, a navigation stack, or a user interface) can control the movement of the robot. 
 
 ## Security
 
